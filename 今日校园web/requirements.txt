@@ -1,0 +1,7 @@
+DBUtils==3.0.2
+Flask==2.0.2
+pyaes==1.6.1
+pycryptodome==3.14.1
+pyDes==2.0.1
+PyMySQL==1.0.2
+requests==2.27.1
