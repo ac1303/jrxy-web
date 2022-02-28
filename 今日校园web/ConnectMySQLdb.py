@@ -8,9 +8,9 @@ class Operation_mysql():
                                mincached=1,# 初始化时，链接池中至少创建的空闲的链接，0表示不创建
                                maxcached=3,# 链接池中最多闲置的链接，0和None不限制
                                maxconnections=10,# 连接池允许的最大连接数，0和None表示不限制连接数
-                               host='39.101',
+                               host='',
                                user='jrxy',
-                               password='dYeSdMwhiB',
+                               password='',
                                db='jrxy',
                                port=3306,
                                charset='utf8',

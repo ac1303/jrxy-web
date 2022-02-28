@@ -8,7 +8,6 @@ from pymysql import NULL
 
 import requests
 import Encrypt
-import requests
 import datetime
 class getLoginInfo:
     def __init__(self):
@@ -118,7 +117,8 @@ class submitTasks(getLoginInfo):
         self.pushDeerKey = stu.getPushDeerKey()
         self.errorCount = int(stu.getErrorCount())
         # 今日校园打卡任务
-        self.punchTask=NULL
+        self.punchTask={}
+        self.signTaskName="科院2021-2022学年第二学期学生安全日报"
         #今日校园信息收集任务
         self.collectorTask={}
         self.collectorTaskName="科技学院2022年寒假学生健康安全日报"
@@ -149,13 +149,86 @@ class submitTasks(getLoginInfo):
             self.head['Cookie'] = 'HWWAFSESID='+self.HWWAFSESID+'; HWWAFSESTIME='+self.HWWAFSESTIME+'; MOD_AUTH_CAS='+self.ticket
             req = requests.post(self.config.get('url', "tasks_url"),
                                 headers=self.head, data=json.dumps(params))
-            self.punchTask = json.loads(req.text)
-            # print(req.text)
-            return True
+            tasks = json.loads(req.text)
+            # print(tasks)
+            for task in tasks['datas']['signedTasks']:
+                if(task['taskName']==self.signTaskName):
+                    self.punchTask['signInstanceWid']=task['signInstanceWid']
+                    self.punchTask['signWid']=task['signWid']
+                    # 获取打卡的详细数据
+                    req = requests.post(self.config.get('url', "sign_detail_url"),
+                                headers=self.head, data=json.dumps(self.punchTask))
+                    print(req.text)
+                    print(datetime.datetime.now(),self.studentId,'存在需要打卡的任务')
+                    return True
+                else:
+                    continue
+            print(datetime.datetime.now(),self.studentId,'没有需要打卡的任务！')
+            return False
         except:
             print(datetime.datetime.now(),self.studentId,'getTasks失败！')
             return False
-    
+
+    def submitTask(self):
+        try:
+            print(datetime.datetime.now(),self.studentId,'开始打卡...')
+            extension = {
+                "systemName": "android",
+                "systemVersion": "11",
+                "model": self.phoneModel,
+                "deviceId": Encrypt.GenDeviceID(self.studentId, self.phoneModel),
+                "appVersion": self.config.get('key', "appversion"),
+                "lon": self.lon,
+                "lat": self.lat,
+                "userId": self.studentId}
+            self.head.clear()
+            self.head = {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 7.1.1; MI 6 Build/NMF26X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36',
+                'CpdailyStandAlone': '0',
+                'extension': '1',
+                'Connection': 'Keep-Alive',
+                'Accept-Encoding': 'gzip'}
+            self.head['Host'] = 'huat.campusphere.net'
+            self.head['Cpdaily-Extension']=Encrypt.DESEncrypt(json.dumps(extension))
+            self.head['Content-Type'] = 'application/json;charset=UTF-8'
+            self.head['Cookie'] = 'HWWAFSESID='+self.HWWAFSESID+'; HWWAFSESTIME='+self.HWWAFSESTIME+'; MOD_AUTH_CAS='+self.ticket
+            form = {
+                "longitude": self.lon,
+                "latitude": self.lat,
+                "isMalposition": '0',
+                "abnormalReason": "",
+                "signPhotoUrl": "",
+                "isNeedExtra": '1',
+                "position":  self.address,
+                "uaIsCpadaily": 'true',
+                "signInstanceWid": self.punchTask['signInstanceWid'],
+                "signVersion": "1.0.0",
+                "extraFieldItems": [
+                    {"extraFieldItemValue": "是（已到校，走读学生填写此项）", "extraFieldItemWid": '1853523'}, 
+                    {"extraFieldItemValue": "36.3℃", "extraFieldItemWid": '1853528'}, 
+                    {"extraFieldItemValue": "否", "extraFieldItemWid": '1853541'}, 
+                    {"extraFieldItemValue": "否", "extraFieldItemWid": '1853542'}, 
+                    {"extraFieldItemValue": "健康码、行程码均无异常", "extraFieldItemWid": '1853545'}]}
+            body = {
+                    "appVersion": self.config.get('key', "appversion"),
+                    "systemName": "android",
+                    "bodyString": Encrypt.GenBodyString(form),
+                    "model": self.phoneModel,
+                    "lon": self.lon,
+                    "calVersion": "firstv",
+                    "systemVersion": "11",
+                    "deviceId": Encrypt.GenDeviceID(self.studentId, self.phoneModel),
+                    "userId": self.studentId,
+                    "version": "first_v2",
+                    "lat": self.lat}
+            body['sign'] = Encrypt.SignForm(body)
+            r = json.loads(requests.post(self.config.get('url', "sign_url"), data=json.dumps(body), headers=self.head).text)
+            print(datetime.datetime.now(),"任务打卡数据为：",r)
+            self.pushMessage("今日校园打卡",r['message'])
+            return True
+        except:
+            return False
+
     def getCollector(self):
         try:
             print(datetime.datetime.now(),'开始获取学校收集信息任务')
@@ -213,7 +286,17 @@ class submitTasks(getLoginInfo):
                     # "schoolTaskWid": "",
                     "schoolTaskWid": self.collectorTask['schoolTaskWid'],
                     "instanceWid": self.collectorTask['instanceWid'],
-                    "form":[{'wid':'33394','formWid':'3088','fieldType':'7','title':'今天你的所在地是？','sort':1,'value': self.address_province+'/'+self.address_city+'/'+self.address_region,'show':True,'formType':'0','sortNum':'1'},{'wid':'33395','formWid':'3088','fieldType':'2','title':'你是否已经安全抵达目的地？','sort':2,'fieldItems':[{'itemWid':'78251','content':'是，已抵达','isOtherItems':False,}],'value':'78251','show':True,'formType':'0','sortNum':'2'},{'wid':'33396','formWid':'3088','fieldType':'2','title':'今天你的体温是多少？','sort':3,'fieldItems':[{'itemWid':'78254','content':'37.2℃及以下','isOtherItems':False,}],'value':'78254','show':True,'formType':'0','sortNum':'3'},{'wid':'33397','formWid':'3088','fieldType':'2','title':'今天你的身体状况是？','sort':4,'fieldItems':[{'itemWid':'78256','content':'健康','isOtherItems':False,}],'value':'78256','show':True,'formType':'0','sortNum':'4'},{'wid':'33398','formWid':'3088','fieldType':'2','title':'截至打卡当日，你所在地区是否为中、高风险地区？','sort':5,'fieldItems':[{'itemWid':'78262','content':'否','isOtherItems':False,}],'value':'78262','show':True,'formType':'0','sortNum':'5'},{'wid':'33399','formWid':'3088','fieldType':'2','title':'近14天你或你的共同居住人是否有疫情中、高风险区域人员接触史？','sort':6,'fieldItems':[{'itemWid':'78264','content':'否','isOtherItems':False,}],'value':'78264','show':True,'formType':'0','sortNum':'6'},{'wid':'33400','formWid':'3088','fieldType':'2','title':'近14天你或你的共 同居住人是否和确诊、疑似病人接触过？','sort':7,'fieldItems':[{'itemWid':'78266','content':'否','isOtherItems':False,}],'value':'78266','show':True,'formType':'0','sortNum':'7'},{'wid':'33401','formWid':'3088','fieldType':'2','title':'近14天你或你的共同居住人是否是确诊、疑似病例 ？','sort':8,'fieldItems':[{'itemWid':'78268','content':'否','isOtherItems':False,}],'value':'78268','show':True,'formType':'0','sortNum':'8'},{'wid':'33402','formWid':'3088','fieldType':'2','title':'你或你的共同居住人目前是否被医学隔离？','sort':9,'fieldItems':[{'itemWid':'78270','content':'否','imageUrl':'','isOtherItems':False,}],'value':'78270','show':True,'formType':'0','sortNum':'9'},{'wid':'33403','formWid':'3088','fieldType':'2','title':'今天你当地的健康码颜色是？','sort':10,'fieldItems':[{'itemWid':'78271','content':'绿色','isOtherItems':False,}],'value':'78271','show':True,'formType':'0','sortNum':'10'},{'wid':'33404','formWid':'3088','fieldType':'2','title':'本人是否承诺以上所填报的全部内容均属实、准确，不存在任何隐瞒与不实的情况，更无遗漏之处','sort':11,'fieldItems':[{'itemWid':'78274','content':'是','isOtherItems':False,}],'value':'78274','show':True,'formType':'0','sortNum':'11'}]
+                    "form":[{'wid':'33394','formWid':'3088','fieldType':'7','title':'今天你的所在地是？','sort':1,'value': self.address_province+'/'+self.address_city+'/'+self.address_region,'show':True,'formType':'0','sortNum':'1'},
+                    {'wid':'33395','formWid':'3088','fieldType':'2','title':'你是否已经安全抵达目的地？','sort':2,'fieldItems':[{'itemWid':'78251','content':'是，已抵达','isOtherItems':False,}],'value':'78251','show':True,'formType':'0','sortNum':'2'},
+                    {'wid':'33396','formWid':'3088','fieldType':'2','title':'今天你的体温是多少？','sort':3,'fieldItems':[{'itemWid':'78254','content':'37.2℃及以下','isOtherItems':False,}],'value':'78254','show':True,'formType':'0','sortNum':'3'},
+                    {'wid':'33397','formWid':'3088','fieldType':'2','title':'今天你的身体状况是？','sort':4,'fieldItems':[{'itemWid':'78256','content':'健康','isOtherItems':False,}],'value':'78256','show':True,'formType':'0','sortNum':'4'},
+                    {'wid':'33398','formWid':'3088','fieldType':'2','title':'截至打卡当日，你所在地区是否为中、高风险地区？','sort':5,'fieldItems':[{'itemWid':'78262','content':'否','isOtherItems':False,}],'value':'78262','show':True,'formType':'0','sortNum':'5'},
+                    {'wid':'33399','formWid':'3088','fieldType':'2','title':'近14天你或你的共同居住人是否有疫情中、高风险区域人员接触史？','sort':6,'fieldItems':[{'itemWid':'78264','content':'否','isOtherItems':False,}],'value':'78264','show':True,'formType':'0','sortNum':'6'},
+                    {'wid':'33400','formWid':'3088','fieldType':'2','title':'近14天你或你的共 同居住人是否和确诊、疑似病人接触过？','sort':7,'fieldItems':[{'itemWid':'78266','content':'否','isOtherItems':False,}],'value':'78266','show':True,'formType':'0','sortNum':'7'},
+                    {'wid':'33401','formWid':'3088','fieldType':'2','title':'近14天你或你的共同居住人是否是确诊、疑似病例 ？','sort':8,'fieldItems':[{'itemWid':'78268','content':'否','isOtherItems':False,}],'value':'78268','show':True,'formType':'0','sortNum':'8'},
+                    {'wid':'33402','formWid':'3088','fieldType':'2','title':'你或你的共同居住人目前是否被医学隔离？','sort':9,'fieldItems':[{'itemWid':'78270','content':'否','imageUrl':'','isOtherItems':False,}],'value':'78270','show':True,'formType':'0','sortNum':'9'},
+                    {'wid':'33403','formWid':'3088','fieldType':'2','title':'今天你当地的健康码颜色是？','sort':10,'fieldItems':[{'itemWid':'78271','content':'绿色','isOtherItems':False,}],'value':'78271','show':True,'formType':'0','sortNum':'10'},
+                     {'wid':'33404','formWid':'3088','fieldType':'2','title':'本人是否承诺以上所填报的全部内容均属实、准确，不存在任何隐瞒与不实的情况，更无遗漏之处','sort':11,'fieldItems':[{'itemWid':'78274','content':'是','isOtherItems':False,}],'value':'78274','show':True,'formType':'0','sortNum':'11'}]
                     }
             body = {
                     "appVersion": self.config.get('key', "appversion"),
@@ -249,7 +332,6 @@ class submitTasks(getLoginInfo):
             self.head['Cpdaily-Extension']=Encrypt.DESEncrypt(json.dumps(extension))
             self.head['Content-Type'] = 'application/json;charset=UTF-8'
             self.head['Cookie'] = 'HWWAFSESID='+self.HWWAFSESID+'; HWWAFSESTIME='+self.HWWAFSESTIME+'; MOD_AUTH_CAS='+self.ticket
-            print(111)
             r = json.loads(requests.post(self.config.get('url', "collector_submitForm_url"), data=json.dumps(body), headers=self.head).text)
             print(datetime.datetime.now(),"任务打卡数据为：",r)
             self.pushMessage("今日校园打卡",r['message'])
