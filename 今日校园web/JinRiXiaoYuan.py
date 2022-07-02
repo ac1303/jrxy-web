@@ -40,15 +40,15 @@ class getLoginInfo:
                 }
             req = self.session.get(self.config.get('url', "login_Url"), headers=self.head)
             set_cookie = req.headers["SET-COOKIE"]
-            route = re.findall("route=(.*?),", set_cookie)[0]
-            JSESSIONID = re.findall("JSESSIONID=(.*?);", set_cookie)[0]
+            # route = re.findall("route=(.*?),", set_cookie)[0]
+            # JSESSIONID = re.findall("JSESSIONID=(.*?);", set_cookie)[0]
             html = req.text
             LT = re.findall('name="lt" value="(.*)"', html)[0]
             key = re.findall('var pwdDefaultEncryptSalt = "(.*?)"', html)[0]
             dllt = re.findall('name="dllt" value="(.*)"', html)[0]
             execution = re.findall('name="execution" value="(.*?)"', html)[0]
             rmShown = re.findall('name="rmShown" value="(.*?)"', html)[0]
-            print(datetime.datetime.now(),self.studentId+'获取登录页面信息成功,正在进行登录前的准备...')
+            print(datetime.datetime.now(),self.studentId,'获取登录页面信息成功,正在进行登录前的准备...')
             body = {
                 'username': self.studentId,
                 'password': Encrypt.AESEncrypt_psw(self.password, key),
@@ -61,18 +61,18 @@ class getLoginInfo:
             }
             req = self.session.post(self.config.get('url', "login_Url"),data=body, headers=self.head)
             set_cookie = req.history[0].headers["SET-COOKIE"]
-            CASTGC = re.findall("CASTGC=(.*?);", set_cookie)[0]
-            CASPRIVACY = re.findall("CASPRIVACY=(.*?);", set_cookie)[0]
-            iPlanetDirectoryPro = re.findall(
-                "iPlanetDirectoryPro=(.*?);", set_cookie)
-            print(datetime.datetime.now(),self.studentId+"登录成功,成功获取CASTGC,下一步获取HWWAFSESID和HWWAFSESTIME....")
+            # CASTGC = re.findall("CASTGC=(.*?);", set_cookie)[0]
+            # CASPRIVACY = re.findall("CASPRIVACY=(.*?);", set_cookie)[0]
+            # iPlanetDirectoryPro = re.findall(
+            #     "iPlanetDirectoryPro=(.*?);", set_cookie)
+            print(datetime.datetime.now(),self.studentId,"登录成功,成功获取CASTGC,下一步获取HWWAFSESID和HWWAFSESTIME....")
             req = self.session.get(self.config.get('url', "getHWW_url"), headers=self.head)
             set_cookie = req.history[0].headers["SET-COOKIE"]
             HWWAFSESID = re.findall("HWWAFSESID=(.*?);", set_cookie)[0]
             self.HWWAFSESID=HWWAFSESID
             HWWAFSESTIME = re.findall("HWWAFSESTIME=(.*?);", set_cookie)[0]
             self.HWWAFSESTIME=HWWAFSESTIME
-            print(datetime.datetime.now(),self.studentId+'获取HWWAFSESID和HWWAFSESTIME成功，正在进行获取MOD_AUTH_CAS前的准备...')
+            print(datetime.datetime.now(),self.studentId,'获取HWWAFSESID和HWWAFSESTIME成功，正在进行获取MOD_AUTH_CAS前的准备...')
             self.head['Cookie'] = 'HWWAFSESID=' + HWWAFSESID+'; HWWAFSESTIME='+HWWAFSESTIME
             self.head['Host'] = 'huat.campusphere.net'
             req = self.session.get(self.config.get('url', "cas_url"), headers=self.head)
@@ -96,11 +96,13 @@ class getLoginInfo:
             # req = self.session.post(req.history[0].headers["Location"], headers=self.head)
             ticket = re.findall(
                 "ticket=(.*)", req.history[1].headers['Location'])[0]
-            print(datetime.datetime.now(),self.studentId+'成功获取MOD_AUTH_CAS,保存数据后结束该函数！')
+            print(datetime.datetime.now(),self.studentId,'成功获取MOD_AUTH_CAS,保存数据后结束该函数！')
             self.ticket=ticket
-            print(self.studentId+"的ticket是："+ticket)
+            print(self.studentId,"的ticket是："+ticket)
             return True
-        except:
+        except Exception as e:
+            # 打印异常
+            print(datetime.datetime.now(),self.studentId,'获取MOD_AUTH_CAS失败，异常信息：'+str(e))
             return False
         # if(self.config.has_section('Cookie')!=True):
         #     self.config.add_section("Cookie")
@@ -141,11 +143,11 @@ class submitTasks(getLoginInfo):
             url=self.config.get('url', "pushDeer_url")+"?pushkey="+self.pushDeerKey+"&text="+title+":"+desp
             req = json.loads(requests.get(url=url).text)
             if(len(req.get("content").get("result"))>0):
-                print(self.studentId+"推送成功")
+                print(self.studentId,"推送成功")
 
     def getTasks(self):
         try:
-            print(datetime.datetime.now(),self.studentId+'正在获取打卡任务...')
+            print(datetime.datetime.now(),self.studentId,'正在获取打卡任务...')
             self.head.clear()
             self.head = {
                 'User-Agent': 'Mozilla/5.0 (Linux; Android 7.1.1; MI 6 Build/NMF26X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36',
@@ -159,7 +161,7 @@ class submitTasks(getLoginInfo):
             req = requests.post(self.config.get('url', "tasks_url"),
                                 headers=self.head, data=json.dumps(params))
             tasks = json.loads(req.text)
-            print(self.studentId+"获取打卡任务成功")
+            print(self.studentId,"获取打卡任务成功")
             for task in tasks['datas']['unSignedTasks']:
                 if(task['taskName']==self.signTaskName):
                     self.punchTask['signInstanceWid']=task['signInstanceWid']
@@ -167,7 +169,7 @@ class submitTasks(getLoginInfo):
                     # 获取打卡的详细数据
                     req = requests.post(self.config.get('url', "sign_detail_url"),
                                 headers=self.head, data=json.dumps(self.punchTask))
-                    print(req.text)
+                    # print(req.text)
                     print(datetime.datetime.now(),self.studentId,'存在需要打卡的任务')
                     return True
                 else:

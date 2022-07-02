@@ -53,7 +53,7 @@ def submit(stu):
             sendMessage(stu,"今日校园打卡：","获取打卡任务失败")
             print(stu.getStudentID(),"获取打卡任务失败")
     else:
-        countErrors(stu)
+        # countErrors(stu)
         sendMessage(stu,"今日校园打卡：","登录失败，请检查账号密码是否正确，连续错误三次将删除自动打卡任务")
         print(stu.getStudentID(),"登录失败")
 
