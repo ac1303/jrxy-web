@@ -1,0 +1,13 @@
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:58:30 +0800] "GET / HTTP/1.1" 200 6813 http-bio-8080-exec-1 824
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:58:30 +0800] "GET /index.css HTTP/1.1" 304 - http-bio-8080-exec-3 24
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:58:30 +0800] "GET /index.js HTTP/1.1" 304 - http-bio-8080-exec-2 6
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:58:30 +0800] "GET /Server.png HTTP/1.1" 304 - http-bio-8080-exec-4 2
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:58:31 +0800] "GET /favicon.ico HTTP/1.1" 404 973 http-bio-8080-exec-6 3
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:58:56 +0800] "GET /getStudentIdAndPassword?studentId=20199013333&password=dsdssfdfadfa HTTP/1.1" 200 208 http-bio-8080-exec-7 1279
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:59:30 +0800] "GET /getStudentIdAndPassword?studentId=2019901333&password=fanshuhua111. HTTP/1.1" 200 150 http-bio-8080-exec-8 3112
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:16:59:51 +0800] "GET /getAddressLonAndLat?address=%E6%B2%B3%E5%8D%97%E7%9C%81%E5%8D%97%E9%98%B3%E5%B8%82%E5%8D%A7%E9%BE%99%E5%8C%BA HTTP/1.1" 200 38 http-bio-8080-exec-9 1622
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:17:00:17 +0800] "GET /getRequestCaptcha?key=PDU4477T9s84NUvrYQASjr87acp6R6Aaak9prPE&channel=PushDeer HTTP/1.1" 200 34 http-bio-8080-exec-10 307
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:17:00:22 +0800] "GET /getRequestCaptcha?key=PDU4477T9s84NUvrYQASjr87acp6R6Aaak9prPE&channel=ServerChan HTTP/1.1" 200 58 http-bio-8080-exec-10 185
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:17:00:31 +0800] "GET /getRequestCaptcha?key=PDU4477T9s84NUvrYQASjr87acp6R6Aaak9prPE5&channel=ServerChan HTTP/1.1" 200 58 http-bio-8080-exec-10 118
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:17:00:37 +0800] "GET /getRequestCaptcha?key=PDU4477T9s84NUvrYQASjr87acp6R6Aaak9prPE5&channel=PushDeer HTTP/1.1" 200 31 http-bio-8080-exec-10 512
+0:0:0:0:0:0:0:1 - - [12/Feb/2022:17:00:56 +0800] "POST /postRegister HTTP/1.1" 200 31 http-bio-8080-exec-10 840

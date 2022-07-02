@@ -1,0 +1,11 @@
+com\anchen\encrypt\JinzhiEducation.class
+com\anchen\model\Jrxy.class
+com\anchen\mysql\OperationDatabase.class
+com\anchen\function\Register.class
+com\anchen\timer\Captcha.class
+com\anchen\function\GetLonAndLat.class
+com\anchen\function\SendCaptcha.class
+com\anchen\function\ValidateCaptcha.class
+com\anchen\function\VerifyStudentIDAndPassword.class
+com\anchen\httprequest\HttpRequest.class
+com\anchen\mysql\ConnMySQL.class

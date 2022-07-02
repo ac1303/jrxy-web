@@ -1,0 +1,8 @@
+com\anchen\route\PostRegister.class
+com\anchen\timer\starUp$1.class
+com\anchen\timer\ScheduleDasks.class
+com\anchen\route\GetAddressLonAndLat.class
+com\anchen\route\GetValidateCaptcha.class
+com\anchen\route\GetRequestCaptcha.class
+com\anchen\timer\starUp.class
+com\anchen\route\GetStudentIdAndPassword.class

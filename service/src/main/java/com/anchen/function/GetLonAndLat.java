@@ -10,7 +10,7 @@ import com.anchen.httprequest.HttpRequest;
 public class GetLonAndLat {
     public static JSONObject getLonAndLat(String address) {
         String url = "https://api.map.baidu.com/geocoding/v3/";
-        String param = "address=" + address + "&output=json&ak=uUMHLLKRVWpszrspq4Yt1wT";
+        String param = "address=" + address + "&output=json&ak=uUMHLLKRVWpszrspq4Yt1wTLlAVg3dnT";
         String result = HttpRequest.sendGet(url, param);
         System.out.println(result);
         JSONObject res = JSONObject.parseObject(result);

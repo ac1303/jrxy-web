@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 /**
- * @author 安宸
+ * @author 范书华
  * @create 2022/2/7 15:37
  */
 final public class Captcha {

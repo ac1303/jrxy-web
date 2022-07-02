@@ -48,7 +48,7 @@ class getLoginInfo:
             dllt = re.findall('name="dllt" value="(.*)"', html)[0]
             execution = re.findall('name="execution" value="(.*?)"', html)[0]
             rmShown = re.findall('name="rmShown" value="(.*?)"', html)[0]
-            print(datetime.datetime.now(),'获取登录页面信息成功,正在进行登录前的准备...')
+            print(datetime.datetime.now(),self.studentId+'获取登录页面信息成功,正在进行登录前的准备...')
             body = {
                 'username': self.studentId,
                 'password': Encrypt.AESEncrypt_psw(self.password, key),
@@ -65,31 +65,40 @@ class getLoginInfo:
             CASPRIVACY = re.findall("CASPRIVACY=(.*?);", set_cookie)[0]
             iPlanetDirectoryPro = re.findall(
                 "iPlanetDirectoryPro=(.*?);", set_cookie)
-            print(datetime.datetime.now(),"登录成功,成功获取CASTGC,下一步获取HWWAFSESID和HWWAFSESTIME....")
+            print(datetime.datetime.now(),self.studentId+"登录成功,成功获取CASTGC,下一步获取HWWAFSESID和HWWAFSESTIME....")
             req = self.session.get(self.config.get('url', "getHWW_url"), headers=self.head)
             set_cookie = req.history[0].headers["SET-COOKIE"]
             HWWAFSESID = re.findall("HWWAFSESID=(.*?);", set_cookie)[0]
             self.HWWAFSESID=HWWAFSESID
             HWWAFSESTIME = re.findall("HWWAFSESTIME=(.*?);", set_cookie)[0]
             self.HWWAFSESTIME=HWWAFSESTIME
-            print(datetime.datetime.now(),'获取HWWAFSESID和HWWAFSESTIME成功，正在进行获取MOD_AUTH_CAS前的准备...')
-            self.head['Cookie'] = 'HWWAFSESID=' + \
-                HWWAFSESID+'; HWWAFSESTIME='+HWWAFSESTIME
+            print(datetime.datetime.now(),self.studentId+'获取HWWAFSESID和HWWAFSESTIME成功，正在进行获取MOD_AUTH_CAS前的准备...')
+            self.head['Cookie'] = 'HWWAFSESID=' + HWWAFSESID+'; HWWAFSESTIME='+HWWAFSESTIME
             self.head['Host'] = 'huat.campusphere.net'
-            req = self.session.post(self.config.get('url', "cas_url"), headers=self.head)
-            print(datetime.datetime.now(),'第一步完成...')
-            self.head['Host'] = 'cas.huat.edu.cn'
-            self.head['Cookie'] = 'CASTGC='+CASTGC+'; route='+route+'; JSESSIONID='+JSESSIONID + \
-                '; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN'
-            print(datetime.datetime.now(),'第二步完成...')
-            req = self.session.post(req.history[0].headers["Location"], headers=self.head)
-            self.head['Host'] = 'huat.campusphere.net'
-            print(datetime.datetime.now(),'第三步完成...')
-            req = self.session.post(req.history[0].headers["Location"], headers=self.head)
+            req = self.session.get(self.config.get('url', "cas_url"), headers=self.head)
+            # print(req)
+            # print(req.text)
+            # print(req.headers)
+            # print(req.history[0].headers)
+            # print(req.history[1].headers)
+            # print(req.history[2].headers)
+
+
+            # req = self.session.post(self.config.get('url', "cas_url"), headers=self.head)
+            # print(datetime.datetime.now(),'第一步完成...')
+            # self.head['Host'] = 'cas.huat.edu.cn'
+            # self.head['Cookie'] = 'CASTGC='+CASTGC+'; route='+route+'; JSESSIONID='+JSESSIONID + \
+            #     '; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN'
+            # print(datetime.datetime.now(),'第二步完成...')
+            # req = self.session.post(req.history[0].headers["Location"], headers=self.head)
+            # self.head['Host'] = 'huat.campusphere.net'
+            # print(datetime.datetime.now(),'第三步完成...')
+            # req = self.session.post(req.history[0].headers["Location"], headers=self.head)
             ticket = re.findall(
-                "ticket=(.*)", req.history[0].headers['Location'])[0]
-            print(datetime.datetime.now(),'成功获取MOD_AUTH_CAS,保存数据后结束该函数！')
+                "ticket=(.*)", req.history[1].headers['Location'])[0]
+            print(datetime.datetime.now(),self.studentId+'成功获取MOD_AUTH_CAS,保存数据后结束该函数！')
             self.ticket=ticket
+            print(self.studentId+"的ticket是："+ticket)
             return True
         except:
             return False
@@ -132,11 +141,11 @@ class submitTasks(getLoginInfo):
             url=self.config.get('url', "pushDeer_url")+"?pushkey="+self.pushDeerKey+"&text="+title+":"+desp
             req = json.loads(requests.get(url=url).text)
             if(len(req.get("content").get("result"))>0):
-                print("推送成功")
+                print(self.studentId+"推送成功")
 
     def getTasks(self):
         try:
-            print(datetime.datetime.now(),'正在获取打卡任务...')
+            print(datetime.datetime.now(),self.studentId+'正在获取打卡任务...')
             self.head.clear()
             self.head = {
                 'User-Agent': 'Mozilla/5.0 (Linux; Android 7.1.1; MI 6 Build/NMF26X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36',
@@ -150,8 +159,8 @@ class submitTasks(getLoginInfo):
             req = requests.post(self.config.get('url', "tasks_url"),
                                 headers=self.head, data=json.dumps(params))
             tasks = json.loads(req.text)
-            # print(tasks)
-            for task in tasks['datas']['signedTasks']:
+            print(self.studentId+"获取打卡任务成功")
+            for task in tasks['datas']['unSignedTasks']:
                 if(task['taskName']==self.signTaskName):
                     self.punchTask['signInstanceWid']=task['signInstanceWid']
                     self.punchTask['signWid']=task['signWid']
@@ -204,7 +213,7 @@ class submitTasks(getLoginInfo):
                 "signInstanceWid": self.punchTask['signInstanceWid'],
                 "signVersion": "1.0.0",
                 "extraFieldItems": [
-                    {"extraFieldItemValue": "是（已到校，走读学生填写此项）", "extraFieldItemWid": '1853523'}, 
+                    {"extraFieldItemValue": "否（暂未返校）", "extraFieldItemWid": '1853524'}, 
                     {"extraFieldItemValue": "36.3℃", "extraFieldItemWid": '1853528'}, 
                     {"extraFieldItemValue": "否", "extraFieldItemWid": '1853541'}, 
                     {"extraFieldItemValue": "否", "extraFieldItemWid": '1853542'}, 

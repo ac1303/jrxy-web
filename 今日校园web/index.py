@@ -72,10 +72,12 @@ def countErrors(stu):
 for item in pool.select_infor("select * from jrxy"):
     stu=student.student(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11])
     executor.submit(submit, (stu))
-    # if(stu.getStudentID()==2019901344):
-    #     executor.submit(submit, (stu))
-    #     break
-    # continue
-    # executor.submit(sendMessage, stu,"今日校园自动打卡维护通知","学校修改了打卡方式，我正在重新适配，这两天需要手动打卡，请注意")
+
+# 测试使用
+# for item in pool.select_infor("select * from jrxy"):
+#     stu=student.student(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11])
+#     if(stu.getStudentID()==2019901333):
+#         executor.submit(submit, (stu))
+#         break
+    # executor.submit(sendMessage, stu,"重新填写今日校园数据","该链接三天内有效，信息填写地址：https://jrxy.fshoo.cn/")
     # print(stu.getStudentID())
-# conn.close()

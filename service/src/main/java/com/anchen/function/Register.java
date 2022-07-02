@@ -1,6 +1,7 @@
 package com.anchen.function;
 
 import com.alibaba.fastjson.JSONObject;
+import com.anchen.httprequest.HttpRequest;
 import com.anchen.model.Jrxy;
 import com.anchen.mysql.OperationDatabase;
 
@@ -63,6 +64,12 @@ public class Register {
             if(OperationDatabase.insert(jrxy)){
                 jsonObject.put("code",1);
                 jsonObject.put("msg","注册成功");
+                try {
+                    String url = "https://api2.pushdeer.com/message/push?pushkey=PDU4477T9s84NUvrYQASjr87acp6R6Aaak9prPE5&text=新注册用户ID："+IDAndPsw.getString("id");
+                    String data = HttpRequest.sendGet(url);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }else {
                 jsonObject.put("code",0);
                 jsonObject.put("msg","注册失败,无法保存到数据库");

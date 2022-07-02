@@ -17,13 +17,13 @@ public class VerifyStudentIDAndPassword {
             resultJson.put("msg","账号已存在，请联系我修改数据，QQ：878375551");
             return resultJson;
         }
-        String url = "http://39.101.***.**:5000/login/"+id+"&"+password+"&QyBkSG";
+        String url = "http://39.101.141.70:5000/login/"+id+"&"+password+"&QyBkSG8tfssy";
         String result = HttpRequest.sendGet(url);
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code")==200){
             String sign=id+"/"+password;
             try {
-                sign=JinzhiEducation.encryptAES(sign,"kSXW5puqx","kSXW5puq");
+                sign=JinzhiEducation.encryptAES(sign,"kSXW5puqxPbMPgCp","kSXW5puqxPbMPgCp");
                 resultJson.put("code",200);
                 resultJson.put("sign",sign);
             } catch (Exception e) {
@@ -45,7 +45,7 @@ public class VerifyStudentIDAndPassword {
         String id= "";
         String password= "";
         try {
-            data = JinzhiEducation.decryptAES(token,"kSXW5puqx","kSXW5puqx");
+            data = JinzhiEducation.decryptAES(token,"kSXW5puqxPbMPgCp","kSXW5puqxPbMPgCp");
             data=data.substring(65);
             if(data.contains("/")){
                 id=data.substring(0,data.indexOf("/"));
